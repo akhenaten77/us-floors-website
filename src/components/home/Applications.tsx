@@ -61,7 +61,7 @@ export default function Applications() {
         ease: "power2.out",
         scrollTrigger: {
           trigger: container.current,
-          start: "top 80%",
+          start: "top 95%", // Delay the trigger so cards only reveal when higher in view
         }
       }
     );

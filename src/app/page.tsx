@@ -12,6 +12,7 @@ export default function Home() {
     <main className="flex flex-col min-h-screen">
       <Hero />
       <ExplodedSystem />
+      <div className="h-48 md:h-80 w-full bg-[var(--color-darker)]"></div> {/* Added margin/spacer to double the gap between precision engineering and scroll story */}
       <ScrollStory />
       <ProductHighlight />
       <TechSpecs />

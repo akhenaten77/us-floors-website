@@ -7,6 +7,8 @@ import { useGSAP } from "@gsap/react";
 export default function Hero() {
   const container = useRef<HTMLDivElement>(null);
   const gridOverlay = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const warpGridRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     const tl = gsap.timeline();
@@ -22,19 +24,41 @@ export default function Hero() {
       );
   }, { scope: container });
 
-  // Mouse tracking for spotlight effect
+  // Mouse tracking for spotlight and warp/expansion effect
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!container.current || !gridOverlay.current) return;
+      if (!container.current || !gridOverlay.current || !gridRef.current || !warpGridRef.current) return;
       
       const rect = container.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
+      // Spotlight effect
       gsap.to(gridOverlay.current, {
-        background: `radial-gradient(circle 300px at ${x}px ${y}px, rgba(255,255,255,0.15), transparent)`,
+        background: `radial-gradient(circle 350px at ${x}px ${y}px, rgba(255,255,255,0.075), transparent)`,
         duration: 0.4,
         ease: "power2.out"
+      });
+
+      // Localized Grid Expansion Warp
+      // We use a secondary grid layer that is slightly scaled up and follows the mouse with a mask
+      gsap.to(warpGridRef.current, {
+        maskImage: `radial-gradient(circle 250px at ${x}px ${y}px, black 0%, transparent 100%)`,
+        WebkitMaskImage: `radial-gradient(circle 250px at ${x}px ${y}px, black 0%, transparent 100%)`,
+        duration: 0.2,
+        ease: "none"
+      });
+
+      // Subtle container tilt
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const moveX = (x - centerX) / 100;
+      const moveY = (y - centerY) / 100;
+
+      gsap.to(gridRef.current, {
+        transform: `perspective(1200px) rotateX(${-moveY}deg) rotateY(${moveX}deg)`,
+        duration: 0.8,
+        ease: "power1.out"
       });
     };
 
@@ -52,20 +76,28 @@ export default function Hero() {
 
   return (
     <section ref={container} className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[var(--color-dark)] py-32 md:py-40">
-      {/* Animated Background Grid */}
+      {/* Animated Background Grid Layer 1 (Static-ish) */}
       <div
-        className="hero-bg-grid absolute inset-0 z-0 bg-[linear-gradient(to_right,#ffffff1a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff1a_1px,transparent_1px)] bg-[size:60px_60px]"
+        ref={gridRef}
+        className="hero-bg-grid absolute inset-0 z-0 bg-[linear-gradient(to_right,#ffffff22_1px,transparent_1px),linear-gradient(to_bottom,#ffffff22_1px,transparent_1px)] bg-[size:60px_60px]"
         style={{ opacity: 0 }}
       >
+        {/* Animated Background Grid Layer 2 (Expanded Warp) */}
+        <div
+          ref={warpGridRef}
+          className="absolute inset-0 z-10 bg-[linear-gradient(to_right,#ffffff44_1px,transparent_1px),linear-gradient(to_bottom,#ffffff44_1px,transparent_1px)] bg-[size:64px_64px] origin-center scale-[1.05]"
+          style={{ maskImage: 'none', WebkitMaskImage: 'none' }}
+        ></div>
+
         {/* Spotlight overlay that follows cursor */}
         <div 
           ref={gridOverlay}
-          className="absolute inset-0 z-10 opacity-100 pointer-events-none transition-opacity duration-500"
-          style={{ background: 'radial-gradient(circle 300px at 50% 50%, rgba(255,255,255,0.05), transparent)' }}
+          className="absolute inset-0 z-20 opacity-100 pointer-events-none transition-opacity duration-500"
+          style={{ background: 'radial-gradient(circle 350px at 50% 50%, rgba(255,255,255,0.03), transparent)' }}
         ></div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-dark)] via-transparent to-[var(--color-dark)] z-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-dark)] via-transparent to-[var(--color-dark)] z-20"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-dark)] via-transparent to-[var(--color-dark)] z-30"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-dark)] via-transparent to-[var(--color-dark)] z-30"></div>
       </div>
 
       {/* Content */}

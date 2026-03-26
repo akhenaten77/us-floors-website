@@ -18,29 +18,29 @@ export default function ExplodedSystem() {
         scrollTrigger: {
           trigger: triggerRef.current,
           start: "top top",
-          end: "+=3000",
+          end: "+=3500", // Reverted closer to original (3000) for a faster feel while keeping a small pause
           scrub: 1,
           pin: true,
         }
       });
 
-      // ── PHASE 1 (0 → 0.45): Components assemble onto the panel ──
-      // Stringers grid drops onto the panel
+      // ── PHASE 1 (0 → 0.4): Components assemble onto the panel ──
+      // Stringers grid drops onto the panel. y: 10 makes it sit just flush below the panel z-wise.
       tl.fromTo(".layer-stringer",
         { y: -300, opacity: 0, scale: 1.1 },
-        { y: 60, opacity: 1, scale: 1, duration: 0.15 },
+        { y: 10, opacity: 1, scale: 1, duration: 0.15 },
         0
       );
       // Pedestals appear below
       tl.fromTo(".layer-pedestal",
         { y: -150, opacity: 0 },
-        { y: 120, opacity: 1, duration: 0.15 },
+        { y: 80, opacity: 1, duration: 0.15 },
         0.05
       );
       // Base slides in
       tl.fromTo(".layer-base",
         { y: 80, opacity: 0 },
-        { y: 180, opacity: 1, duration: 0.15 },
+        { y: 140, opacity: 1, duration: 0.15 },
         0.1
       );
 
@@ -61,15 +61,19 @@ export default function ExplodedSystem() {
         0.25
       );
 
-      // ── PHASE 2 (0.5 → 1.0): Everything fades up and out ──
-      tl.to(".system-heading", { opacity: 0, y: -80, duration: 0.2 }, 0.5);
-      tl.to(".layer-panel", { y: -400, opacity: 0, duration: 0.25 }, 0.55);
-      tl.to(".layer-stringer", { y: -340, opacity: 0, duration: 0.25 }, 0.57);
-      tl.to(".layer-pedestal", { y: -280, opacity: 0, duration: 0.25 }, 0.59);
-      tl.to(".layer-base", { y: -220, opacity: 0, duration: 0.25 }, 0.61);
-      tl.to(".desc-panel", { opacity: 0, y: -40, duration: 0.15 }, 0.55);
-      tl.to(".desc-stringer", { opacity: 0, y: -40, duration: 0.15 }, 0.57);
-      tl.to(".desc-pedestal", { opacity: 0, y: -40, duration: 0.15 }, 0.59);
+      // ── PHASE 2: Static Pause (0.4 → 0.7) ──
+      // Adding empty space to "finish the animation" and keep the assembly on screen longer
+      tl.to({}, { duration: 0.3 });
+
+      // ── PHASE 3 (0.75 → 1.0): Everything fades up and out ──
+      tl.to(".system-heading", { opacity: 0, y: -80, duration: 0.2 }, 0.75);
+      tl.to(".layer-panel", { y: -400, opacity: 0, duration: 0.25 }, 0.8);
+      tl.to(".layer-stringer", { y: -340, opacity: 0, duration: 0.25 }, 0.82);
+      tl.to(".layer-pedestal", { y: -280, opacity: 0, duration: 0.25 }, 0.84);
+      tl.to(".layer-base", { y: -220, opacity: 0, duration: 0.25 }, 0.86);
+      tl.to(".desc-panel", { opacity: 0, y: -40, duration: 0.15 }, 0.82);
+      tl.to(".desc-stringer", { opacity: 0, y: -40, duration: 0.15 }, 0.84);
+      tl.to(".desc-pedestal", { opacity: 0, y: -40, duration: 0.15 }, 0.86);
 
     }, triggerRef);
 
