@@ -11,13 +11,13 @@ gsap.registerPlugin(ScrollTrigger);
 
 const projects = [
   {
-    title: "Deutsche Telekom Data Center",
-    location: "Frankfurt, Germany",
-    area: "45,000 sq ft",
+    title: "Project Alpha: Tier-III Data Center",
+    location: "Hyderabad, India",
+    area: "160 sq ft",
     year: "2024",
-    type: "Data Center",
-    img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=800",
-    desc: "Complete FLEXI raised floor installation for a Tier IV colocation data center. Included airflow grilles, hot/cold aisle containment integration, and seismic bracing across 3 floors.",
+    type: "Lecture Hall",
+    img: "/projects/telekom-dc.jpg",
+    desc: "A mission-critical installation featuring calcium sulphate panels and high-strength pedestals. The installation was completed with precision to support high-density server rack loads.",
   },
   {
     title: "Horizon Corporate Tower",
@@ -25,7 +25,7 @@ const projects = [
     area: "120,000 sq ft",
     year: "2024",
     type: "Corporate Office",
-    img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800",
+    img: "/projects/lalala.jpg",
     desc: "Multi-floor raised access installation for a Fortune 500 headquarters. HPL panels with integrated cable management and custom-finished edge ramps for ADA compliance.",
   },
   {
@@ -47,13 +47,13 @@ const projects = [
     desc: "Ultra-low profile raised floor for a trading floor environment with extensive under-floor cable routing for fiber optics and power distribution units.",
   },
   {
-    title: "Infosys Tech Campus",
-    location: "Bengaluru, India",
-    area: "200,000 sq ft",
-    year: "2022",
-    type: "Technology Campus",
-    img: "https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&q=80&w=800",
-    desc: "Campus-wide raised flooring solution across 4 buildings with modular reconfigurability to support evolving workspace layouts and technology upgrades.",
+    title: "NACIN",
+    location: "Hyderabad, India",
+    area: "850 sq ft",
+    year: "2024",
+    type: "Hub Room",
+    img: "/projects/infosys_installation.jpg",
+    desc: "A sprawling office installation utilizing modular HPL panels. The layout was engineered to allow flexible floor reconfiguration and easy access to high-capacity under-floor wiring.",
   },
   {
     title: "Singapore Government NOC",

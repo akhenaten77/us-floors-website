@@ -54,10 +54,10 @@ export default function ScrollStory() {
 
           <div className="relative h-[500px] md:h-[700px] w-full">
             <div className="story-img-1 absolute top-0 left-0 w-[80%] h-[60%] bg-slate-800 rounded-sm shadow-2xl overflow-hidden z-10">
-              <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-60 mix-blend-luminosity grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"></div>
+              <div className="w-full h-full bg-[url('/images/story/story1.jpg')] bg-cover bg-center opacity-80 mix-blend-luminosity grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"></div>
             </div>
             <div className="story-img-2 absolute bottom-0 right-0 w-[65%] h-[55%] bg-slate-700 rounded-sm shadow-2xl overflow-hidden border-8 border-[var(--color-dark)] z-20">
-              <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-70 mix-blend-luminosity grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"></div>
+              <div className="w-full h-full bg-[url('/images/story/story2.jpg')] bg-cover bg-center opacity-90 mix-blend-luminosity grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"></div>
             </div>
           </div>
 
