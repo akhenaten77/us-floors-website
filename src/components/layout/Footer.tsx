@@ -22,7 +22,7 @@ export default function Footer() {
             Premium engineered raised access flooring solutions for commercial spaces, offices, and data centers. Built for performance.
           </p>
         </div>
-        
+
         <div className="md:col-span-1">
           <h4 className="text-white font-semibold mb-4">Solutions</h4>
           <ul className="space-y-3 text-sm">
@@ -45,10 +45,10 @@ export default function Footer() {
         <div className="md:col-span-1">
           <h4 className="text-white font-semibold mb-4">Contact</h4>
           <ul className="space-y-3 text-sm">
-            <li>123 Engineering Way</li>
-            <li>Industrial Park, CA 90210</li>
-            <li>contact@usfloors.com</li>
-            <li>+1 (555) 123-4567</li>
+            <li>Ground Floor, #141</li>
+            <li>Hyderabad, Telangana 500032</li>
+            <li>saroj@usfloors.in</li>
+            <li>+91 78427-41241</li>
           </ul>
         </div>
       </div>

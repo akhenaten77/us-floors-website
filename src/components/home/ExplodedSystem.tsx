@@ -3,146 +3,210 @@
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 export default function ExplodedSystem() {
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: triggerRef.current,
-          start: "top top",
-          end: "+=3500", // Reverted closer to original (3000) for a faster feel while keeping a small pause
-          scrub: 1,
-          pin: true,
-        }
-      });
+  useGSAP(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
 
-      // ── PHASE 1 (0 → 0.4): Components assemble onto the panel ──
-      // Stringers grid drops onto the panel. y: 10 makes it sit just flush below the panel z-wise.
-      tl.fromTo(".layer-stringer",
-        { y: -300, opacity: 0, scale: 1.1 },
-        { y: 10, opacity: 1, scale: 1, duration: 0.15 },
-        0
-      );
-      // Pedestals appear below
-      tl.fromTo(".layer-pedestal",
-        { y: -150, opacity: 0 },
-        { y: 80, opacity: 1, duration: 0.15 },
-        0.05
-      );
-      // Base slides in
-      tl.fromTo(".layer-base",
-        { y: 80, opacity: 0 },
-        { y: 140, opacity: 1, duration: 0.15 },
-        0.1
-      );
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: wrapperRef.current,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1,
+        // pin: true -> REMOVED. Relying on CSS sticky wrapper logic to prevent calculation errors.
+      }
+    });
 
-      // Description labels appear during phase 1
-      tl.fromTo(".desc-panel",
-        { opacity: 0, x: 60 },
-        { opacity: 1, x: 0, duration: 0.1 },
-        0.05
-      );
-      tl.fromTo(".desc-stringer",
-        { opacity: 0, x: -60 },
-        { opacity: 1, x: 0, duration: 0.1 },
-        0.15
-      );
-      tl.fromTo(".desc-pedestal",
-        { opacity: 0, x: 60 },
-        { opacity: 1, x: 0, duration: 0.1 },
-        0.25
-      );
+    // ── INITIAL SCENE VISIBILITY ──
+    // Hide the master scene container initially so high-Z elements don't show before it starts
+    gsap.set(".scene-container", { opacity: 0 });
+    tl.to(".scene-container", { opacity: 1, duration: 0.5 }, 0); 
 
-      // ── PHASE 2: Static Pause (0.4 → 0.7) ──
-      // Adding empty space to "finish the animation" and keep the assembly on screen longer
-      tl.to({}, { duration: 0.3 });
+    // ── INITIAL STATE ──
+    // Place elements high up on the Z axis (translating exactly towards the screen/above in Isometric)
+    // CRITICAL: We DO NOT animate or set opacity on these preserve-3d groups. Setting opacity < 1 mathematically breaks native WebKit 3D intersection sorting!
+    gsap.set(".pedestal-group", { z: 1200 }); 
+    gsap.set([".stringer-top", ".stringer-bottom", ".stringer-left", ".stringer-right"], { z: 1500 });
+    gsap.set(".tile-group", { z: 1800 });
+    
+    gsap.set([".text-pedestal", ".text-stringer", ".text-tile"], { opacity: 0, y: 20 });
 
-      // ── PHASE 3 (0.75 → 1.0): Everything fades up and out ──
-      tl.to(".system-heading", { opacity: 0, y: -80, duration: 0.2 }, 0.75);
-      tl.to(".layer-panel", { y: -400, opacity: 0, duration: 0.25 }, 0.8);
-      tl.to(".layer-stringer", { y: -340, opacity: 0, duration: 0.25 }, 0.82);
-      tl.to(".layer-pedestal", { y: -280, opacity: 0, duration: 0.25 }, 0.84);
-      tl.to(".layer-base", { y: -220, opacity: 0, duration: 0.25 }, 0.86);
-      tl.to(".desc-panel", { opacity: 0, y: -40, duration: 0.15 }, 0.82);
-      tl.to(".desc-stringer", { opacity: 0, y: -40, duration: 0.15 }, 0.84);
-      tl.to(".desc-pedestal", { opacity: 0, y: -40, duration: 0.15 }, 0.86);
+    // ── TIME 0.5 - 2.0: PEDESTALS ──
+    tl.to(".pedestal-group", {
+      z: 0,
+      duration: 1.5,
+      ease: "power2.out",
+      stagger: 0.15 // User explicitly wanted pedestals with "slight stagger between them"
+    }, 0.5);
+    tl.to(".text-pedestal", { opacity: 1, y: 0, duration: 0.5 }, 0.8);
 
-    }, triggerRef);
+    // ── TIME 2.5 - 3.5: STRINGERS ──
+    tl.to(".text-pedestal", { opacity: 0, y: -10, duration: 0.4 }, 2.3);
+    
+    tl.to([".stringer-top", ".stringer-bottom", ".stringer-left", ".stringer-right"], {
+      z: 0, // Drop straight down from Z instead of sliding from sides
+      duration: 1,
+      ease: "back.out(1.2)", 
+      // User explicitly requested stringers drop "simultaneously" without stagger
+    }, 2.5);
+    tl.to(".text-stringer", { opacity: 1, y: 0, duration: 0.5 }, 2.8);
 
-    return () => ctx.revert();
-  }, []);
+    // ── TIME 4.0 - 5.5: TILE ──
+    tl.to(".text-stringer", { opacity: 0, y: -10, duration: 0.4 }, 3.8);
+
+    tl.to(".tile-group", {
+      z: 0,
+      duration: 1.5,
+      ease: "power3.out"
+    }, 4.0);
+    tl.to(".text-tile", { opacity: 1, y: 0, duration: 0.5 }, 4.3);
+
+    // ── TIME 5.5 - 6.5: HOLD ──
+    tl.to({}, { duration: 1.2 });
+
+    // ── TIME 6.7 - 7.2: CLEAR THE SCREEN ──
+    // Fading the global container guarantees a perfect screen clear without breaking individual 3D elements natively
+    tl.to([".scene-container", ".text-tile", ".section-header"], {
+      opacity: 0,
+      y: -50,
+      duration: 0.5,
+      ease: "power2.inOut"
+    }, 6.7);
+
+  }, { scope: wrapperRef }); // Wrap scope to outer wrapper
 
   return (
-    <section ref={triggerRef} className="bg-[var(--color-darker)] text-white h-screen flex flex-col items-center overflow-hidden relative w-full border-t border-white/5">
-      <div ref={containerRef} className="w-full h-full relative max-w-7xl mx-auto flex flex-col items-center">
+    // OUTER NATIVE SCROLL WRAPPER (Forces 4000px height mathematically into the DOM to guarantee no overlaps)
+    <div ref={wrapperRef} className="w-full relative h-[4000px] border-t border-white/5 bg-[#0f1115]">
+      
+      {/* INNER STICKY CONTAINER (Replaces GSAP JS pinning with rock-solid CSS) */}
+      <section className="sticky top-0 text-white w-full h-screen overflow-hidden flex flex-col items-center justify-center font-sans">
+        
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),transparent_70%)] pointer-events-none"></div>
 
-        {/* Heading at the top with some padding */}
-        <div className="system-heading text-center z-50 px-6 pt-28 md:pt-32">
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
-            PRECISION ENGINEERING.
-          </h2>
-          <p className="text-[var(--color-accent)] text-xl md:text-2xl font-medium tracking-wide">
-            LAYER BY LAYER ASSEMBLY.
-          </p>
-        </div>
-
-        {/* Isometric 3D Visualization — positioned BELOW the heading */}
-        <div className="relative w-full max-w-2xl flex justify-center perspective-[1200px] mt-12 md:mt-16 flex-1">
-
-          {/* Panel — visible from the start, positioned clearly below text */}
-          <div className="layer-panel absolute z-40 w-72 h-72 bg-slate-200 border-2 border-white backdrop-blur-md transform rotate-x-[60deg] rotate-z-[-45deg] shadow-[0_30px_50px_rgba(0,0,0,0.5)] flex items-center justify-center top-8">
-            <div className="absolute inset-4 border border-slate-300/50"></div>
+        <div className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center relative h-full px-6">
+          
+          {/* Header */}
+          <div className="section-header absolute top-20 left-1/2 -translate-x-1/2 text-center w-full z-50">
+            <h2 className="text-3xl md:text-5xl font-light tracking-tight mb-2 text-[#e2e8f0]">
+              Precision Assembly
+            </h2>
+            <p className="text-[var(--color-accent)] text-xs md:text-sm font-semibold tracking-[0.2em] uppercase opacity-70">
+              Engineered. Mechanical. Exact.
+            </p>
           </div>
 
-          {/* Stringers Grid */}
-          <div className="layer-stringer absolute z-30 w-72 h-72 transform rotate-x-[60deg] rotate-z-[-45deg] border-[3px] border-slate-600 shadow-xl grid grid-cols-2 grid-rows-2 top-8" style={{ opacity: 0 }}>
-            <div className="border-r-[3px] border-b-[3px] border-slate-600"></div>
-            <div className="border-b-[3px] border-slate-600"></div>
-            <div className="border-r-[3px] border-slate-600"></div>
-            <div></div>
+          {/* Dynamic Text Labels */}
+          <div className="absolute top-40 md:top-48 left-1/2 -translate-x-1/2 text-center z-50 w-full pointer-events-none h-16">
+            <h3 className="text-pedestal absolute inset-0 text-xl md:text-2xl font-medium text-[#cbd5e1] tracking-wide">
+              Strong Pedestal Foundation
+            </h3>
+            <h3 className="text-stringer absolute inset-0 text-xl md:text-2xl font-medium text-[#cbd5e1] tracking-wide">
+              Rigid Stringer Framework
+            </h3>
+            <h3 className="text-tile absolute inset-0 text-xl md:text-2xl font-medium text-[#cbd5e1] tracking-wide">
+              Precision Engineered Panels
+            </h3>
           </div>
 
-          {/* Pedestals */}
-          <div className="layer-pedestal absolute z-20 w-72 h-72 transform rotate-x-[60deg] rotate-z-[-45deg] top-8" style={{ opacity: 0 }}>
-            <div className="absolute top-0 left-0 w-4 h-24 bg-gradient-to-b from-slate-400 to-slate-800 rounded-sm translate-y-16 -translate-x-2 shadow-lg"></div>
-            <div className="absolute top-0 right-0 w-4 h-24 bg-gradient-to-b from-slate-400 to-slate-800 rounded-sm translate-y-16 translate-x-2 shadow-lg"></div>
-            <div className="absolute bottom-0 left-0 w-4 h-24 bg-gradient-to-b from-slate-400 to-slate-800 rounded-sm translate-y-16 -translate-x-2 shadow-lg"></div>
-            <div className="absolute bottom-0 right-0 w-4 h-24 bg-gradient-to-b from-slate-400 to-slate-800 rounded-sm translate-y-16 translate-x-2 shadow-lg"></div>
-            <div className="absolute top-1/2 left-1/2 w-4 h-24 bg-gradient-to-b from-slate-400 to-slate-800 rounded-sm translate-y-16 -translate-x-2 shadow-lg"></div>
+          {/* 3D Scene */}
+          <div className="scene-container relative w-[260px] h-[260px] md:w-[360px] md:h-[360px] perspective-[2500px] mt-16 md:mt-24 pointer-events-none">
+            
+            <div 
+              className="absolute inset-0 preserve-3d"
+              style={{ 
+                transformStyle: "preserve-3d", 
+                transform: "rotateX(60deg) rotateZ(-45deg)" 
+              }}
+            >
+              {/* Ground Shadow Grid */}
+              <div className="absolute inset-[-40%] bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] transform-style-3d translate-z-[-1px] opacity-50" style={{ transform: "translateZ(-1px)" }}></div>
+
+              {/* Pedestals Setup */}
+              {[
+                { id: 'tl', t: '0%', l: '0%' },
+                { id: 'tr', t: '0%', l: '100%' },
+                { id: 'bl', t: '100%', l: '0%' },
+                { id: 'br', t: '100%', l: '100%' },
+              ].map((pos) => (
+                <div 
+                  key={pos.id} 
+                  className="pedestal-group absolute w-8 h-8 -translate-x-1/2 -translate-y-1/2" 
+                  style={{ top: pos.t, left: pos.l, transformStyle: "preserve-3d" }}
+                >
+                  <div className="absolute inset-0 bg-[#94a3b8] border border-[#64748b] rounded-sm shadow-[0_0_15px_rgba(0,0,0,0.5)]" style={{ transform: "translateZ(0px)" }}></div>
+                  
+                  {Array.from({ length: 15 }).map((_, j) => (
+                    <div 
+                      key={j} 
+                      className="absolute top-1/2 left-1/2 w-[10px] h-[10px] rounded-full bg-[#cbd5e1] border-[0.5px] border-[#94a3b8] -translate-x-1/2 -translate-y-1/2" 
+                      style={{ transform: `translateZ(${j * 4}px)` }} 
+                    />
+                  ))}
+                  
+                  <div className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 bg-[#e2e8f0] border border-[#94a3b8] rounded-sm shadow-xl" style={{ transform: "translateZ(60px)" }}></div>
+                </div>
+              ))}
+
+              {/* Top Stringer */}
+              <div className="stringer-group stringer-top absolute top-0 left-0 w-full h-3 -translate-y-1/2" style={{ transformStyle: "preserve-3d" }}>
+                <div className="absolute inset-0 bg-[#e2e8f0] border border-[#94a3b8]" style={{ transform: 'translateZ(62px)' }} />
+                <div className="absolute bottom-0 left-0 w-full h-[18px] bg-[#94a3b8] border-x border-b border-[#64748b]" style={{ transformOrigin: 'bottom', transform: 'translateZ(62px) rotateX(-90deg)' }} />
+              </div>
+              
+              {/* Bottom Stringer */}
+              <div className="stringer-group stringer-bottom absolute bottom-0 left-0 w-full h-3 translate-y-1/2" style={{ transformStyle: "preserve-3d" }}>
+                <div className="absolute inset-0 bg-[#e2e8f0] border border-[#94a3b8]" style={{ transform: 'translateZ(62px)' }} />
+                <div className="absolute top-0 left-0 w-full h-[18px] bg-[#cbd5e1] border-x border-t border-[#64748b]" style={{ transformOrigin: 'top', transform: 'translateZ(62px) rotateX(90deg)' }} />
+              </div>
+
+              {/* Left Stringer */}
+              <div className="stringer-group stringer-left absolute top-0 left-0 h-full w-3 -translate-x-1/2" style={{ transformStyle: "preserve-3d" }}>
+                <div className="absolute inset-0 bg-[#e2e8f0] border border-[#94a3b8]" style={{ transform: 'translateZ(62px)' }} />
+                <div className="absolute top-0 right-0 h-full w-[18px] bg-[#94a3b8] border-y border-r border-[#64748b]" style={{ transformOrigin: 'right', transform: 'translateZ(62px) rotateY(90deg)' }} />
+              </div>
+
+              {/* Right Stringer */}
+              <div className="stringer-group stringer-right absolute top-0 right-0 h-full w-3 translate-x-1/2" style={{ transformStyle: "preserve-3d" }}>
+                <div className="absolute inset-0 bg-[#e2e8f0] border border-[#94a3b8]" style={{ transform: 'translateZ(62px)' }} />
+                <div className="absolute top-0 left-0 h-full w-[18px] bg-[#cbd5e1] border-y border-l border-[#64748b]" style={{ transformOrigin: 'left', transform: 'translateZ(62px) rotateY(-90deg)' }} />
+              </div>
+
+              {/* Tile Setup */}
+              <div className="tile-group absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+                <div className="absolute inset-0 bg-[#f8f9fa] border border-[#cbd5e1] shadow-[inset_0_0_40px_rgba(0,0,0,0.03)]" style={{ transform: 'translateZ(74px)' }}>
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05]"></div>
+                </div>
+                
+                <div className="absolute bottom-0 left-0 w-full h-[10px] bg-[#e2e8f0] border-x border-b border-[#cbd5e1] flex items-center justify-around px-2" style={{ transformOrigin: 'bottom', transform: 'translateZ(74px) rotateX(-90deg)' }}>
+                  <div className="w-4 h-1 rounded-full bg-[#cbd5e1]/50"></div>
+                  <div className="w-4 h-1 rounded-full bg-[#cbd5e1]/50"></div>
+                  <div className="w-4 h-1 rounded-full bg-[#cbd5e1]/50"></div>
+                </div>
+                
+                <div className="absolute top-0 right-0 w-[10px] h-full bg-[#f1f5f9] border-y border-r border-[#cbd5e1] flex flex-col items-center justify-around py-2" style={{ transformOrigin: 'right', transform: 'translateZ(74px) rotateY(90deg)' }}>
+                  <div className="w-1 h-4 rounded-full bg-[#cbd5e1]/50"></div>
+                  <div className="w-1 h-4 rounded-full bg-[#cbd5e1]/50"></div>
+                  <div className="w-1 h-4 rounded-full bg-[#cbd5e1]/50"></div>
+                </div>
+
+                <div className="absolute inset-[-10%] bg-black/40 blur-2xl rounded-lg" style={{ transform: 'translateZ(10px)' }}></div>
+              </div>
+
+            </div>
           </div>
 
-          {/* Base / Floor Slab */}
-          <div className="layer-base absolute z-10 w-80 h-80 bg-stone-900 border-2 border-stone-700 transform rotate-x-[60deg] rotate-z-[-45deg] shadow-2xl flex items-center justify-center backdrop-blur-sm -ml-4 top-4" style={{ opacity: 0 }}>
-            <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,255,255,0.03)_10px,rgba(255,255,255,0.03)_20px)]"></div>
-          </div>
-
         </div>
-
-        {/* Descriptions */}
-        <div className="desc-panel absolute right-[5%] md:right-[15%] top-[35%] text-right z-50 max-w-xs" style={{ opacity: 0 }}>
-          <h3 className="text-2xl font-bold text-white mb-2 uppercase tracking-wide">HPL Surface Panel</h3>
-          <p className="text-sm text-[var(--color-light)]/60 leading-relaxed">High-pressure laminate core providing ultimate load distribution and static dissipation.</p>
-        </div>
-
-        <div className="desc-stringer absolute left-[5%] md:left-[15%] top-[55%] text-left z-50 max-w-xs" style={{ opacity: 0 }}>
-          <h3 className="text-2xl font-bold text-white mb-2 uppercase tracking-wide">Steel Stringers</h3>
-          <p className="text-sm text-[var(--color-light)]/60 leading-relaxed">Heavy-duty galvanized steel framing for enhanced lateral stability and edge support.</p>
-        </div>
-
-        <div className="desc-pedestal absolute right-[5%] md:right-[15%] top-[72%] text-right z-50 max-w-xs" style={{ opacity: 0 }}>
-          <h3 className="text-2xl font-bold text-white mb-2 uppercase tracking-wide">Adjustable Pedestals</h3>
-          <p className="text-sm text-[var(--color-light)]/60 leading-relaxed">Precision height adjustment mechanism to accommodate under-floor services.</p>
-        </div>
-
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
