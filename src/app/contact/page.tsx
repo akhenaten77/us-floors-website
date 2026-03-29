@@ -55,8 +55,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-white font-semibold mb-1">Phone</p>
-                  <p className="text-[var(--color-light)]/50 text-sm">+1 (555) 842-7100</p>
-                  <p className="text-[var(--color-light)]/50 text-sm">+1 (555) 842-7101 (Sales)</p>
+                  <p className="text-[var(--color-light)]/50 text-sm">+91 7842741241</p>
+                  <p className="text-[var(--color-light)]/50 text-sm">+91 9959553951</p>
                 </div>
               </div>
 
@@ -67,7 +67,7 @@ export default function ContactPage() {
                 <div>
                   <p className="text-white font-semibold mb-1">Email</p>
                   <p className="text-[var(--color-light)]/50 text-sm">info@usfloors.com</p>
-                  <p className="text-[var(--color-light)]/50 text-sm">sales@usfloors.com</p>
+                  <p className="text-[var(--color-light)]/50 text-sm">saroj@usfloors.com</p>
                 </div>
               </div>
 
@@ -78,9 +78,9 @@ export default function ContactPage() {
                 <div>
                   <p className="text-white font-semibold mb-1">Head Office</p>
                   <p className="text-[var(--color-light)]/50 text-sm">
-                    1247 Industrial Blvd, Suite 400<br />
-                    Santa Clara, CA 95054<br />
-                    United States
+                    Ground Floor, #141<br />
+                    Shaikpet, Hyderabad 500032<br />
+                    India
                   </p>
                 </div>
               </div>
@@ -91,26 +91,13 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-white font-semibold mb-1">Business Hours</p>
-                  <p className="text-[var(--color-light)]/50 text-sm">Mon – Fri: 8:00 AM – 6:00 PM PST</p>
-                  <p className="text-[var(--color-light)]/50 text-sm">Sat: 9:00 AM – 1:00 PM PST</p>
+                  <p className="text-[var(--color-light)]/50 text-sm">Mon – Fri: 10:00 AM – 8:00 PM PST</p>
+                  <p className="text-[var(--color-light)]/50 text-sm">Sat: 10:00 AM – 1:00 PM PST</p>
                 </div>
               </div>
             </div>
 
-            {/* Regional Offices */}
-            <h3 className="text-lg font-bold text-white mb-4 tracking-tight">Regional Offices</h3>
-            <div className="space-y-4">
-              {[
-                { city: "New York", addr: "450 Park Avenue, 15th Floor, NY 10022" },
-                { city: "Chicago", addr: "233 S Wacker Dr, Suite 2100, IL 60606" },
-                { city: "Houston", addr: "1600 Smith Street, Suite 300, TX 77002" },
-              ].map((office, i) => (
-                <div key={i} className="bg-white/[0.03] border border-white/10 rounded-sm p-4">
-                  <p className="text-white font-semibold text-sm">{office.city}</p>
-                  <p className="text-[var(--color-light)]/40 text-xs">{office.addr}</p>
-                </div>
-              ))}
-            </div>
+
           </div>
 
           {/* Contact Form */}
@@ -164,7 +151,7 @@ export default function ContactPage() {
                       <label className="block text-[var(--color-light)]/60 text-xs font-semibold uppercase tracking-wider mb-2">Phone</label>
                       <input
                         type="tel"
-                        placeholder="+1 (555) 123-4567"
+                        placeholder="7890543210"
                         className="w-full px-4 py-3 bg-white/[0.05] border border-white/10 rounded-sm text-white text-sm placeholder:text-white/20 focus:border-[var(--color-accent)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 transition-all"
                       />
                     </div>
